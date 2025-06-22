@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "162868168380",
+    "project_id": "mymind-s",
+    "storage_bucket": "mymind-s.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:162868168380:android:f4ef4fdc65a6b0d0f9b2b9",
+        "android_client_info": {
+          "package_name": "com.example.mindmapping"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgvILUM5ffG7gdNzCnesNSwOMe-iQ3-TI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
