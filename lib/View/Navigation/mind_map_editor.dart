@@ -181,11 +181,12 @@ class MindMapEditor extends StatelessWidget {
                     label: 'Ajouter',
                     onTap: () => controller.addNode(),
                   ),
-                  _buildToolButton(
+                  Obx(() => _buildToolButton(
                     icon: Iconsax.link,
                     label: 'Lier',
                     onTap: () => controller.toggleLinkMode(),
-                  ),
+                    isActive: controller.isLinkMode.value,
+                  )),
                   _buildToolButton(
                     icon: Iconsax.text,
                     label: 'Texte',
@@ -246,33 +247,47 @@ class MindMapEditor extends StatelessWidget {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
+    bool isActive = false,
   }) {
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: const Color(0xFF6C63FF).withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 18, color: const Color(0xFF6C63FF)),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFF6C63FF),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
+    onTap: onTap,
+    child: Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: isActive
+          ? Colors.pink.withOpacity(0.2)
+          : const Color(0xFF6C63FF).withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: isActive
+          ? Border.all(color: Colors.pink, width: 1)
+          : null,
       ),
-    );
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 18,
+            color: isActive
+              ? Colors.pink
+              : const Color(0xFF6C63FF),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: isActive
+                ? Colors.pink
+                : const Color(0xFF6C63FF),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
   }
 
   // Remplacez la méthode _showSaveDialog dans MindMapEditor par celle-ci :
@@ -1334,12 +1349,9 @@ class MindMapEditorController extends GetxController {
   }
 
   void toggleLinkMode() {
-    isLinkMode.value = !isLinkMode.value;
-    linkFromNodeId.value = '';
-    if (isLinkMode.value) {
-      // Get.snackbar('Mode liaison', 'Sélectionnez deux nœuds à connecter');
-    }
-  }
+  isLinkMode.value = !isLinkMode.value;
+  linkFromNodeId.value = '';
+}
 
   // Nouvelle méthode pour changer la forme d'un nœud
   void showShapePicker() {
