@@ -37,13 +37,13 @@ class _LoginViewState extends State<LoginView> {
         setState(() {
           isLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Connexion réussie !'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //     content: Text('Connexion réussie !'),
+        //     backgroundColor: Colors.green,
+        //     duration: Duration(seconds: 2),
+        //   ),
+        // );
         Get.off(() => const Navbar());
       }
     } on FirebaseAuthException catch (e) {
@@ -65,12 +65,12 @@ class _LoginViewState extends State<LoginView> {
           errorMessage = 'Erreur de connexion: ${e.message}';
         }
         
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.red,
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text(errorMessage),
+        //     backgroundColor: Colors.red,
+        //   ),
+        // );
       }
     } catch (e) {
       if (mounted) {
@@ -78,12 +78,12 @@ class _LoginViewState extends State<LoginView> {
           isLoading = false;
         });
         
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Une erreur inattendue s\'est produite: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text('Une erreur inattendue s\'est produite: $e'),
+        //     backgroundColor: Colors.red,
+        //   ),
+        // );
       }
     }
   }

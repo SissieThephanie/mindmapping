@@ -1095,13 +1095,13 @@ class MindMapEditorController extends GetxController {
       Get.back();
 
       if (projectId == null) {
-        print('Échec de la sauvegarde - projectId null');
-        // Get.snackbar(
-        //   'Erreur', 
-        //   'Impossible de sauvegarder le projet',
-        //   backgroundColor: Colors.red,
-        //   colorText: Colors.white,
-        // );
+        // print('Échec de la sauvegarde - projectId null');
+        Get.snackbar(
+          'Erreur', 
+          'Impossible de sauvegarder le projet',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
         return;
       }
 
@@ -1147,14 +1147,14 @@ class MindMapEditorController extends GetxController {
     } catch (e) {
       if (Get.isDialogOpen == true) Get.back();
       
-      print('Erreur during saveProject: $e');
-      print('Stack trace: ${StackTrace.current}');
-      // Get.snackbar(
-      //   'Erreur', 
-      //   'Erreur lors de la sauvegarde: ${e.toString()}',
-      //   backgroundColor: Colors.red,
-      //   colorText: Colors.white,
-      // );
+      // print('Erreur during saveProject: $e');
+      // print('Stack trace: ${StackTrace.current}');
+      Get.snackbar(
+        'Erreur', 
+        'Erreur lors de la sauvegarde: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
   }
   
@@ -1543,7 +1543,7 @@ class MindMapEditorController extends GetxController {
   // Nouvelle méthode pour ajuster la taille
   void showSizeEditor() {
     if (selectedNodeId.value.isEmpty) {
-      // Get.snackbar('Erreur', 'Sélectionnez un nœud pour modifier la taille');
+      Get.snackbar('Erreur', 'Sélectionnez un nœud pour modifier la taille');
       return;
     }
 
@@ -1620,7 +1620,7 @@ class MindMapEditorController extends GetxController {
 
   void deleteSelected() {
     if (selectedNodeId.value.isEmpty) {
-      // Get.snackbar('Erreur', 'Sélectionnez un nœud à supprimer');
+      Get.snackbar('Erreur', 'Sélectionnez un nœud à supprimer');
       return;
     }
 
@@ -1705,24 +1705,24 @@ void deleteProject() async {
         //   colorText: Colors.white,
         // );
       } else {
-        // Get.snackbar(
-        //   'Erreur', 
-        //   'Impossible de supprimer le projet',
-        //   backgroundColor: Colors.red,
-        //   colorText: Colors.white,
-        // );
+        Get.snackbar(
+          'Erreur', 
+          'Impossible de supprimer le projet',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     } catch (e) {
       // Fermer l'indicateur de chargement en cas d'erreur
       if (Get.isDialogOpen == true) Get.back();
       
-      print('Erreur suppression: $e');
-      // Get.snackbar(
-      //   'Erreur', 
-      //   'Erreur lors de la suppression: ${e.toString()}',
-      //   backgroundColor: Colors.red,
-      //   colorText: Colors.white,
-      // );
+      // print('Erreur suppression: $e');
+    //   Get.snackbar(
+    //     'Erreur', 
+    //     'Erreur lors de la suppression: ${e.toString()}',
+    //     backgroundColor: Colors.red,
+    //     colorText: Colors.white,
+    //   );
     }
   }
 }
@@ -1756,7 +1756,7 @@ void deleteProject() async {
       final boundary = canvasKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary == null) {
         Get.back();
-        // Get.snackbar('Erreur', 'Impossible de capturer le canvas');
+        Get.snackbar('Erreur', 'Impossible de capturer le canvas');
         return;
       }
 
@@ -1766,7 +1766,7 @@ void deleteProject() async {
 
       if (imageBytes == null) {
         Get.back();
-        // Get.snackbar('Erreur', 'Échec de la capture d\'écran');
+        Get.snackbar('Erreur', 'Échec de la capture d\'écran');
         return;
       }
 
@@ -1786,12 +1786,12 @@ void deleteProject() async {
       );
 
       Get.back();
-      Get.snackbar(
-        'Succès',
-        'PDF généré avec succès',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      // Get.snackbar(
+      //   'Succès',
+      //   'PDF généré avec succès',
+      //   backgroundColor: Colors.green,
+      //   colorText: Colors.white,
+      // );
     } catch (e) {
       if (Get.isDialogOpen == true) Get.back();
       Get.snackbar(
