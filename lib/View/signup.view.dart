@@ -296,9 +296,9 @@ class _SignUpState extends State<SignUp> {
                       if (text == null || text.trim().isEmpty) {
                         return 'Veuillez saisir votre email';
                       }
-                      // if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(text.trim())) {
-                      //   return 'Veuillez saisir un email valide';
-                      // }
+                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(text.trim())) {
+                        return 'Veuillez saisir un email valide';
+                      }
                       return null;
                     },
                     decoration: const InputDecoration(

@@ -212,6 +212,14 @@ class MindMapEditor extends StatelessWidget {
                     label: 'Supprimer',
                     onTap: () => controller.deleteSelected(),
                   ),
+                  _buildToolButton(
+                    icon: Iconsax.size,
+                    label: 'Zoom',
+                    onTap: () {
+                      controller.scale.value = 1.0;
+                      controller.offset.value = Offset.zero;
+                    },
+                  ),
                 ],
               ),
             ),
@@ -221,23 +229,71 @@ class MindMapEditor extends StatelessWidget {
           Expanded(
             child: Obx(() => RepaintBoundary(
               key: controller.canvasKey,
-              child: GestureDetector(
-                onTapDown: (details) => controller.onCanvasTap(details.localPosition),
-                onPanStart: (details) => controller.onPanStart(details.localPosition),
-                onPanUpdate: (details) => controller.onPanUpdate(details.localPosition),
-                onPanEnd: (details) => controller.onPanEnd(),
-                child: CustomPaint(
-                  painter: MindMapPainter(
-                    nodes: controller.nodes,
-                    connections: controller.connections,
-                    selectedNodeId: controller.selectedNodeId.value,
-                    isLinkMode: controller.isLinkMode.value,
-                  ),
-                  size: Size.infinite,
-                ),
-              ),
+              // ✅ Nouveau GestureDetector – corrige le zoom + déplacement d’un seul nœud
+child: GestureDetector(
+  // Quand un doigt ou deux doigts touchent l’écran
+  onScaleStart: (details) {
+    if (details.pointerCount == 2) {
+      // 2 doigts → pour zoom/déplacement du canvas
+      controller.previousScale.value = controller.scale.value;
+      controller.previousOffset.value = details.focalPoint;
+    } else if (details.pointerCount == 1) {
+      // 1 doigt → on commence à déplacer un nœud
+      final adjustedPosition = (details.localFocalPoint - controller.offset.value) / controller.scale.value;
+      controller.onPanStart(adjustedPosition);
+    }
+  },
+
+  // Quand on déplace un ou deux doigts
+  onScaleUpdate: (details) {
+    if (details.pointerCount == 2) {
+      // Zoom + déplacement du canvas
+      final newScale = controller.previousScale.value * details.scale;
+      controller.scale.value = newScale.clamp(0.5, 3.0);
+
+      final newOffset = details.focalPoint - controller.previousOffset.value;
+      controller.offset.value += newOffset;
+      controller.previousOffset.value = details.focalPoint;
+    } else if (details.pointerCount == 1 && controller.draggedNode != null) {
+      // Déplacement du nœud avec un doigt
+      final adjustedPosition = (details.localFocalPoint - controller.offset.value) / controller.scale.value;
+      controller.onPanUpdate(adjustedPosition);
+    }
+  },
+
+  // Quand le doigt est levé
+  onScaleEnd: (details) {
+    controller.previousScale.value = 1.0;
+    controller.previousOffset.value = Offset.zero;
+    controller.onPanEnd(); // fin du glissement du nœud
+  },
+
+  // Sélection d’un nœud (toucher)
+  onTapDown: (details) {
+    final adjustedPosition = (details.localPosition - controller.offset.value) / controller.scale.value;
+    controller.onCanvasTap(adjustedPosition);
+  },
+
+  // La zone à transformer
+  child: Transform(
+    transform: Matrix4.identity()
+      ..translate(controller.offset.value.dx, controller.offset.value.dy)
+      ..scale(controller.scale.value),
+    child: CustomPaint(
+      painter: MindMapPainter(
+        nodes: controller.nodes,
+        connections: controller.connections,
+        selectedNodeId: controller.selectedNodeId.value,
+        isLinkMode: controller.isLinkMode.value,
+      ),
+      size: Size.infinite,
+    ),
+  ),
+),
+
             )),
           ),
+
         ],
       ),
     );
@@ -371,56 +427,57 @@ class MindMapNode {
     this.fontWeight = FontWeight.w600,
   });
   // Méthode copyWith à ajouter dans la classe MindMapNode
-MindMapNode copyWith({
-  String? id,
-  Offset? position,
-  String? text,
-  Color? backgroundColor,
-  Color? textColor,
-  double? width,
-  double? height,
-  NodeShape? shape,
-  bool? isSelected,
-  double? fontSize,
-  FontWeight? fontWeight,
-}) {
-  return MindMapNode(
-    id: id ?? this.id,
-    position: position ?? this.position,
-    text: text ?? this.text,
-    backgroundColor: backgroundColor ?? this.backgroundColor,
-    textColor: textColor ?? this.textColor,
-    width: width ?? this.width,
-    height: height ?? this.height,
-    shape: shape ?? this.shape,
-    isSelected: isSelected ?? this.isSelected,
-    fontSize: fontSize ?? this.fontSize,
-    fontWeight: fontWeight ?? this.fontWeight,
-  );
-}
+  MindMapNode copyWith({
+    String? id,
+    Offset? position,
+    String? text,
+    Color? backgroundColor,
+    Color? textColor,
+    double? width,
+    double? height,
+    NodeShape? shape,
+    bool? isSelected,
+    double? fontSize,
+    FontWeight? fontWeight,
+  }) {
+    return MindMapNode(
+      id: id ?? this.id,
+      position: position ?? this.position,
+      text: text ?? this.text,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      textColor: textColor ?? this.textColor,
+      width: width ?? this.width,
+      height: height ?? this.height,
+      shape: shape ?? this.shape,
+      isSelected: isSelected ?? this.isSelected,
+      fontSize: fontSize ?? this.fontSize,
+      fontWeight: fontWeight ?? this.fontWeight,
+    );
+  }
 
   // Méthode pour vérifier si un point est dans le nœud
   bool containsPoint(Offset point) {
-    final rect = Rect.fromCenter(
-      center: position,
-      width: width,
-      height: height,
-    );
-    
-    switch (shape) {
-      case NodeShape.circle:
-      case NodeShape.ellipse:
-        final dx = (point.dx - position.dx) / (width / 2);
-        final dy = (point.dy - position.dy) / (height / 2);
-        return (dx * dx + dy * dy) <= 1;
-      case NodeShape.diamond:
-        final dx = (point.dx - position.dx).abs() / (width / 2);
-        final dy = (point.dy - position.dy).abs() / (height / 2);
-        return (dx + dy) <= 1;
-      default:
-        return rect.contains(point);
-    }
+  final rect = Rect.fromCenter(
+    center: position,
+    width: width,
+    height: height,
+  );
+
+  switch (shape) {
+    case NodeShape.circle:
+    case NodeShape.ellipse:
+      final dx = (point.dx - position.dx) / (width / 2);
+      final dy = (point.dy - position.dy) / (height / 2);
+      return (dx * dx + dy * dy) <= 1;
+    case NodeShape.diamond:
+      final dx = (point.dx - position.dx).abs() / (width / 2);
+      final dy = (point.dy - position.dy).abs() / (height / 2);
+      return (dx + dy) <= 1;
+    default:
+      return rect.contains(point);
   }
+}
+
 
   Map<String, dynamic> toJson() {
     return {
@@ -795,6 +852,11 @@ class MindMapEditorController extends GetxController {
   final RxBool isLinkMode = false.obs;
   final RxString linkFromNodeId = ''.obs;
   Timer? _updateTimer;
+
+  final RxDouble scale = 1.0.obs;
+  final RxDouble previousScale = 1.0.obs;
+  final Rx<Offset> offset = Offset.zero.obs;
+  final Rx<Offset> previousOffset = Offset.zero.obs;
   
   MindMapNode? draggedNode;
   Offset? dragOffset;
@@ -1248,31 +1310,35 @@ class MindMapEditorController extends GetxController {
   }
 
   void onCanvasTap(Offset position) {
-    // Vérifier si on clique sur un nœud
-    MindMapNode? tappedNode;
-    for (final node in nodes) {
-      if (node.containsPoint(position)) {
-        tappedNode = node;
-        break;
-      }
-    }
+  // Ajuster la position du tap en fonction du zoom/décalage
+   final adjustedPosition = (position - offset.value) / scale.value;
+  
+  // Vérifier si on clique sur un nœud
+  MindMapNode? tappedNode;
+  for (final node in nodes) {
+    if (node.containsPoint(adjustedPosition)) {
 
-    if (tappedNode != null) {
-      if (isLinkMode.value) {
-        _handleLinkModeNodeTap(tappedNode);
-      } else {
-        _selectNode(tappedNode.id);
-      }
-    } else {
-      // Clic sur le canvas vide
-      if (isLinkMode.value) {
-        isLinkMode.value = false;
-        linkFromNodeId.value = '';
-      } else {
-        selectedNodeId.value = '';
-      }
+      tappedNode = node;
+      break;
     }
   }
+
+  if (tappedNode != null) {
+    if (isLinkMode.value) {
+      _handleLinkModeNodeTap(tappedNode);
+    } else {
+      _selectNode(tappedNode.id);
+    }
+  } else {
+    // Clic sur le canvas vide
+    if (isLinkMode.value) {
+      isLinkMode.value = false;
+      linkFromNodeId.value = '';
+    } else {
+      selectedNodeId.value = '';
+    }
+  }
+}
 
   void _handleLinkModeNodeTap(MindMapNode node) {
     if (linkFromNodeId.value.isEmpty) {
@@ -1309,35 +1375,33 @@ class MindMapEditorController extends GetxController {
   }
 
   void onPanStart(Offset position) {
-    for (final node in nodes) {
-      if (node.containsPoint(position)) {
-        draggedNode = node;
-        dragOffset = position - node.position;
-        break;
-      }
+  final adjustedPosition = (position - offset.value) / scale.value;
+
+  for (final node in nodes) {
+    if (node.containsPoint(adjustedPosition)) {
+      draggedNode = node;
+      dragOffset = adjustedPosition - node.position;
+      break;
     }
   }
+}
 
   void onPanUpdate(Offset position) {
-     if (draggedNode != null && dragOffset != null) {
-      // Annuler le timer précédent
-      _updateTimer?.cancel();
-      
-      // Mettre à jour la position
-      draggedNode!.position = position - dragOffset!;
-      
-      // Programmer une mise à jour avec délai
-      _updateTimer = Timer(const Duration(milliseconds: 16), () {
-        nodes.refresh();
-      });
-    }
+  if (draggedNode != null && dragOffset != null) {
+    final adjustedPosition = (position - offset.value) / scale.value;
+    draggedNode!.position = adjustedPosition - dragOffset!;
+    nodes.refresh();
   }
+}
+
+
+
 
   void onPanEnd() {
     draggedNode = null;
     dragOffset = null;
-    _updateTimer?.cancel();
-    _updateTimer = null;
+    // _updateTimer?.cancel();
+    // _updateTimer = null;
     
     // Force une dernière mise à jour
     nodes.refresh();
