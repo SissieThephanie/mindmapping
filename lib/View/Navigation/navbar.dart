@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:mindmapping/View/Navigation/create.dart';
-import 'package:mindmapping/View/Navigation/home.view.dart';
-import 'package:mindmapping/View/Navigation/maps.dart';
 import 'package:mindmapping/View/Navigation/myproject.dart';
 import 'package:mindmapping/View/Navigation/profil.dart';
 import 'package:mindmapping/View/login.view.dart';
@@ -43,7 +41,7 @@ class Navbar extends StatelessWidget {
               ],
             ),
             child: FloatingActionButton(
-              onPressed: () => controller.selectedIndex.value = 2,
+              onPressed: () => controller.selectedIndex.value = 0,
               backgroundColor: Colors.transparent,
               elevation: 0,
               child: AnimatedRotation(
@@ -99,31 +97,31 @@ class Navbar extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  // Home
-                  Flexible(
-                    child: _buildNavItem(
-                      controller: controller,
-                      index: 0,
-                      icon: Iconsax.home_15,
-                      activeIcon: Iconsax.home5,
-                      label: 'Home',
-                    ),
-                  ),
-                  // Maps
-                  Flexible(
-                    child: _buildNavItem(
-                      controller: controller,
-                      index: 1,
-                      icon: Iconsax.heart,
-                      activeIcon: Iconsax.heart,
-                      label: 'Favoris',
-                    ),
-                  ),
+                  // // Home
+                  // Flexible(
+                  //   child: _buildNavItem(
+                  //     controller: controller,
+                  //     index: 0,
+                  //     icon: Iconsax.home_15,
+                  //     activeIcon: Iconsax.home5,
+                  //     label: 'Home',
+                  //   ),
+                  // ),
+                  // // Maps
+                  // Flexible(
+                  //   child: _buildNavItem(
+                  //     controller: controller,
+                  //     index: 1,
+                  //     icon: Iconsax.heart,
+                  //     activeIcon: Iconsax.heart,
+                  //     label: 'Favoris',
+                  //   ),
+                  // ),
                   // My Projects
                   Flexible(
                     child: _buildNavItem(
                       controller: controller,
-                      index: 3,
+                      index: 1,
                       icon: Iconsax.folder_24,
                       activeIcon: Iconsax.folder5,
                       label: 'Projects',
@@ -133,7 +131,7 @@ class Navbar extends StatelessWidget {
                   Flexible(
                     child: _buildNavItem(
                       controller: controller,
-                      index: 4,
+                      index: 2,
                       icon: Iconsax.profile_circle4,
                       activeIcon: Iconsax.profile_circle5,
                       label: 'Profile',
@@ -278,11 +276,9 @@ class Navbar extends StatelessWidget {
 class NavbarController extends GetxController {
   final Rx<int> selectedIndex = 0.obs;
   final screens = [
-    const Home(),
-    const Maps(),
     const Create(),
     const Myproject(),
-    const Profile(),
+    const ProfileView(),
   ];
 
   // Méthode pour afficher la boîte de dialogue de confirmation de déconnexion

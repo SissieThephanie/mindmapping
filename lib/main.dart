@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mindmapping/Services/data_service.dart';
+import 'package:mindmapping/Services/project_storage.dart';
 import 'package:mindmapping/View/splash.view.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -10,6 +11,8 @@ void main() async{
   await Firebase.initializeApp(
   options: DefaultFirebaseOptions.currentPlatform,
 );
+// Dans votre main.dart ou au début de l'app
+Get.put(ProjectStorage());
 Get.put(MindMapDataService());
   runApp(const App());
 }

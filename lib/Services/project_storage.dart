@@ -42,12 +42,12 @@ class ProjectStorage extends GetxController {
       // Puis sauvegarder dans Firestore
       await saveProjectToFirestore(updatedProject);
       
-      print('Projet renommé avec succès: $projectId');
+      // print('Projet renommé avec succès: $projectId');
     } else {
       throw Exception('Projet introuvable: $projectId');
     }
   } catch (e) {
-    print('Erreur lors du renommage du projet: $e');
+    // print('Erreur lors du renommage du projet: $e');
     rethrow;
   }
 }
@@ -178,7 +178,7 @@ class ProjectStorage extends GetxController {
             ...projectData,
             'lastModified': FieldValue.serverTimestamp(),
           });
-          print('Projet mis à jour dans Firestore: $projectId');
+          // print('Projet mis à jour dans Firestore: $projectId');
         } else {
           // Le document n'existe pas, le créer avec l'ID spécifié
           await projectRef.doc(projectId).set({
@@ -186,7 +186,7 @@ class ProjectStorage extends GetxController {
             'createdAt': FieldValue.serverTimestamp(),
             'lastModified': FieldValue.serverTimestamp(),
           });
-          print('Projet créé dans Firestore avec ID: $projectId');
+          // print('Projet créé dans Firestore avec ID: $projectId');
         }
       }
     } catch (e) {

@@ -5,8 +5,14 @@ import 'package:iconsax/iconsax.dart';
 import 'package:mindmapping/Services/data_service.dart';
 import 'dart:math' as math;
 import 'dart:async';
-
+import 'dart:ui' as ui;
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import 'package:mindmapping/Services/project_storage.dart';
+import 'package:flutter/rendering.dart';
+
+// import 'package:image_gallery_saver/image_gallery_saver.dart';
 
 // Énumération pour les formes
 enum NodeShape {
@@ -151,7 +157,7 @@ class MindMapEditor extends StatelessWidget {
                   title: Text('Exporter en Image'),
                   contentPadding: EdgeInsets.zero,
                 ),
-                onTap: () => controller.exportToImage(),
+                // onTap: () => controller.exportToImage(),
               ),
             ],
           ),
@@ -592,25 +598,109 @@ class MindMapPainter extends CustomPainter {
 
     // Dessiner la forme selon le type
     switch (node.shape) {
-      case NodeShape.circle:
-        canvas.drawCircle(node.position, node.width / 2, backgroundPaint);
-        if (borderPaint != null) {
-          canvas.drawCircle(node.position, node.width / 2, borderPaint);
-        }
-        break;
-      case NodeShape.rectangle:
-      case NodeShape.square:
-        canvas.drawRect(rect, backgroundPaint);
-        if (borderPaint != null) {
-          canvas.drawRect(rect, borderPaint);
-        }
-        break;
-      default:
-        canvas.drawRect(rect, backgroundPaint);
-        if (borderPaint != null) {
-          canvas.drawRect(rect, borderPaint);
-        }
+  case NodeShape.circle:
+    canvas.drawCircle(node.position, node.width / 2, backgroundPaint);
+    if (borderPaint != null) canvas.drawCircle(node.position, node.width / 2, borderPaint);
+    break;
+
+  case NodeShape.rectangle:
+    canvas.drawRect(rect, backgroundPaint);
+    if (borderPaint != null) canvas.drawRect(rect, borderPaint);
+    break;
+
+  case NodeShape.square:
+    final squareSize = math.min(node.width, node.height);
+    final squareRect = Rect.fromCenter(center: node.position, width: squareSize, height: squareSize);
+    canvas.drawRect(squareRect, backgroundPaint);
+    if (borderPaint != null) canvas.drawRect(squareRect, borderPaint);
+    break;
+
+  case NodeShape.diamond:
+    final path = Path()
+      ..moveTo(node.position.dx, node.position.dy - node.height / 2)
+      ..lineTo(node.position.dx + node.width / 2, node.position.dy)
+      ..lineTo(node.position.dx, node.position.dy + node.height / 2)
+      ..lineTo(node.position.dx - node.width / 2, node.position.dy)
+      ..close();
+    canvas.drawPath(path, backgroundPaint);
+    if (borderPaint != null) canvas.drawPath(path, borderPaint);
+    break;
+
+  case NodeShape.triangle:
+    final path = Path()
+      ..moveTo(node.position.dx, node.position.dy - node.height / 2)
+      ..lineTo(node.position.dx - node.width / 2, node.position.dy + node.height / 2)
+      ..lineTo(node.position.dx + node.width / 2, node.position.dy + node.height / 2)
+      ..close();
+    canvas.drawPath(path, backgroundPaint);
+    if (borderPaint != null) canvas.drawPath(path, borderPaint);
+    break;
+
+  case NodeShape.hexagon:
+    final path = Path();
+    for (int i = 0; i < 6; i++) {
+      final angle = (math.pi / 3) * i;
+      final x = node.position.dx + (node.width / 2) * math.cos(angle);
+      final y = node.position.dy + (node.height / 2) * math.sin(angle);
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
     }
+    path.close();
+    canvas.drawPath(path, backgroundPaint);
+    if (borderPaint != null) canvas.drawPath(path, borderPaint);
+    break;
+
+  case NodeShape.ellipse:
+    final ellipseRect = Rect.fromCenter(center: node.position, width: node.width, height: node.height);
+    canvas.drawOval(ellipseRect, backgroundPaint);
+    if (borderPaint != null) canvas.drawOval(ellipseRect, borderPaint);
+    break;
+
+  case NodeShape.trapezoid:
+    final path = Path()
+      ..moveTo(node.position.dx - node.width / 2, node.position.dy + node.height / 2)
+      ..lineTo(node.position.dx + node.width / 2, node.position.dy + node.height / 2)
+      ..lineTo(node.position.dx + node.width / 4, node.position.dy - node.height / 2)
+      ..lineTo(node.position.dx - node.width / 4, node.position.dy - node.height / 2)
+      ..close();
+    canvas.drawPath(path, backgroundPaint);
+    if (borderPaint != null) canvas.drawPath(path, borderPaint);
+    break;
+
+  case NodeShape.parallelogram:
+    final path = Path()
+      ..moveTo(node.position.dx - node.width / 2 + 20, node.position.dy - node.height / 2)
+      ..lineTo(node.position.dx + node.width / 2, node.position.dy - node.height / 2)
+      ..lineTo(node.position.dx + node.width / 2 - 20, node.position.dy + node.height / 2)
+      ..lineTo(node.position.dx - node.width / 2, node.position.dy + node.height / 2)
+      ..close();
+    canvas.drawPath(path, backgroundPaint);
+    if (borderPaint != null) canvas.drawPath(path, borderPaint);
+    break;
+
+  case NodeShape.star:
+    final path = Path();
+    final radius = node.width / 2;
+    for (int i = 0; i < 10; i++) {
+      final angle = math.pi / 5 * i;
+      final r = i % 2 == 0 ? radius : radius / 2;
+      final x = node.position.dx + r * math.cos(angle - math.pi / 2);
+      final y = node.position.dy + r * math.sin(angle - math.pi / 2);
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+    path.close();
+    canvas.drawPath(path, backgroundPaint);
+    if (borderPaint != null) canvas.drawPath(path, borderPaint);
+    break;
+}
+
 
     // Dessiner le texte (optimisé)
     _drawNodeText(canvas, node);
@@ -758,10 +848,10 @@ class MindMapEditorController extends GetxController {
 
   void _loadExistingProject() async {
     try {
-      print('Début du chargement du projet: $existingProjectId');
+      // print('Début du chargement du projet: $existingProjectId');
       
       if (_dataService.currentUserId == null) {
-        print('Utilisateur non connecté');
+        // print('Utilisateur non connecté');
         Get.snackbar(
           'Erreur',
           'Vous devez être connecté pour charger ce projet',
@@ -776,7 +866,7 @@ class MindMapEditorController extends GetxController {
       final projectData = await _dataService.getProjectData(existingProjectId!);
       
       if (projectData != null) {
-        print('Données du projet récupérées: ${projectData['title']}');
+        // print('Données du projet récupérées: ${projectData['title']}');
         
         // Mettre à jour les informations du projet
         projectTitle.value = projectData['title'] ?? 'Projet sans titre';
@@ -796,7 +886,7 @@ class MindMapEditorController extends GetxController {
         nodes.clear();
         if (projectData['nodes'] != null && projectData['nodes'] is List) {
           final nodesList = projectData['nodes'] as List;
-          print('Chargement de ${nodesList.length} nœuds');
+          // print('Chargement de ${nodesList.length} nœuds');
           
           for (final nodeData in nodesList) {
             try {
@@ -816,7 +906,7 @@ class MindMapEditorController extends GetxController {
         connections.clear();
         if (projectData['connections'] != null && projectData['connections'] is List) {
           final connectionsList = projectData['connections'] as List;
-          print('Chargement de ${connectionsList.length} connexions');
+          // print('Chargement de ${connectionsList.length} connexions');
           
           for (final connData in connectionsList) {
             try {
@@ -827,21 +917,21 @@ class MindMapEditorController extends GetxController {
                 }
               }
             } catch (e) {
-              print('Erreur lors du chargement d\'une connexion: $e');
+              // print('Erreur lors du chargement d\'une connexion: $e');
             }
           }
         }
         
         // Si aucun nœud n'a été chargé, créer un nœud central
         if (nodes.isEmpty) {
-          print('Aucun nœud chargé, création du nœud central');
+          // print('Aucun nœud chargé, création du nœud central');
           _createCentralNode();
         }
         
-        print('Projet chargé avec succès: ${nodes.length} nœuds, ${connections.length} connexions');
+        // print('Projet chargé avec succès: ${nodes.length} nœuds, ${connections.length} connexions');
         
       } else {
-        print('Impossible de récupérer les données du projet');
+        // print('Impossible de récupérer les données du projet');
         Get.snackbar(
           'Erreur',
           'Impossible de charger le projet',
@@ -851,7 +941,7 @@ class MindMapEditorController extends GetxController {
         _createCentralNode();
       }
     } catch (e) {
-      print('Erreur lors du chargement du projet: $e');
+      // print('Erreur lors du chargement du projet: $e');
       Get.snackbar(
         'Erreur',
         'Erreur lors du chargement: ${e.toString()}',
@@ -868,13 +958,13 @@ class MindMapEditorController extends GetxController {
       if (nodeData['id'] == null || 
           nodeData['position'] == null ||
           nodeData['text'] == null) {
-        print('Données de nœud incomplètes: $nodeData');
+        // print('Données de nœud incomplètes: $nodeData');
         return null;
       }
 
       final position = nodeData['position'];
       if (position is! Map || position['x'] == null || position['y'] == null) {
-        print('Position invalide pour le nœud: $position');
+        // print('Position invalide pour le nœud: $position');
         return null;
       }
 
@@ -894,7 +984,7 @@ class MindMapEditorController extends GetxController {
         fontWeight: FontWeight.values[nodeData['fontWeight'] ?? 0],
       );
     } catch (e) {
-      print('Erreur lors de la création du nœud: $e');
+      // print('Erreur lors de la création du nœud: $e');
       return null;
     }
   }
@@ -905,7 +995,7 @@ class MindMapEditorController extends GetxController {
       if (connData['id'] == null || 
           connData['fromNodeId'] == null ||
           connData['toNodeId'] == null) {
-        print('Données de connexion incomplètes: $connData');
+        // print('Données de connexion incomplètes: $connData');
         return null;
       }
 
@@ -917,7 +1007,7 @@ class MindMapEditorController extends GetxController {
         strokeWidth: (connData['strokeWidth'] as num?)?.toDouble() ?? 2.0,
       );
     } catch (e) {
-      print('Erreur lors de la création de la connexion: $e');
+      // print('Erreur lors de la création de la connexion: $e');
       return null;
     }
   }
@@ -935,10 +1025,9 @@ class MindMapEditorController extends GetxController {
       fontSize: 16.0,
     );
     nodes.add(centralNode);
-    print('Nœud central créé');
+    // print('Nœud central créé');
   }
 
-  // Remplacez la méthode saveProject dans MindMapEditorController par celle-ci :
 
   void saveProject() async {
     try {
@@ -975,19 +1064,19 @@ class MindMapEditorController extends GetxController {
         barrierDismissible: false,
       );
 
-      print('Préparation des données pour la sauvegarde');
-      print('Nombre de nœuds: ${nodes.length}');
-      print('Nombre de connexions: ${connections.length}');
+      // print('Préparation des données pour la sauvegarde');
+      // print('Nombre de nœuds: ${nodes.length}');
+      // print('Nombre de connexions: ${connections.length}');
 
       final nodesData = nodes.map((node) {
         final data = node.toMap();
-        print('Nœud à sauvegarder: ${data['id']} - ${data['text']}');
+        // print('Nœud à sauvegarder: ${data['id']} - ${data['text']}');
         return data;
       }).toList();
       
       final connectionsData = connections.map((conn) {
         final data = conn.toJson();
-        print('Connexion à sauvegarder: ${data['id']} (${data['fromNodeId']} -> ${data['toNodeId']})');
+        // print('Connexion à sauvegarder: ${data['id']} (${data['fromNodeId']} -> ${data['toNodeId']})');
         return data;
       }).toList();
 
@@ -1007,16 +1096,16 @@ class MindMapEditorController extends GetxController {
 
       if (projectId == null) {
         print('Échec de la sauvegarde - projectId null');
-        Get.snackbar(
-          'Erreur', 
-          'Impossible de sauvegarder le projet',
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        // Get.snackbar(
+        //   'Erreur', 
+        //   'Impossible de sauvegarder le projet',
+        //   backgroundColor: Colors.red,
+        //   colorText: Colors.white,
+        // );
         return;
       }
 
-      print('Projet sauvegardé avec l\'ID: $projectId');
+      // print('Projet sauvegardé avec l\'ID: $projectId');
 
       // Mettre à jour les données locales si nécessaire
       try {
@@ -1039,9 +1128,9 @@ class MindMapEditorController extends GetxController {
         // Rafraîchir la liste
         await projectStorage.fetchProjectsFromFirestore(userId);
         
-        print('Sauvegarde locale terminée');
+        // print('Sauvegarde locale terminée');
       } catch (localError) {
-        print('Erreur lors de la sauvegarde locale: $localError');
+        // print('Erreur lors de la sauvegarde locale: $localError');
         // Ne pas afficher d'erreur car la sauvegarde Firestore a réussi
       }
 
@@ -1060,12 +1149,12 @@ class MindMapEditorController extends GetxController {
       
       print('Erreur during saveProject: $e');
       print('Stack trace: ${StackTrace.current}');
-      Get.snackbar(
-        'Erreur', 
-        'Erreur lors de la sauvegarde: ${e.toString()}',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      // Get.snackbar(
+      //   'Erreur', 
+      //   'Erreur lors de la sauvegarde: ${e.toString()}',
+      //   backgroundColor: Colors.red,
+      //   colorText: Colors.white,
+      // );
     }
   }
   
@@ -1173,7 +1262,7 @@ class MindMapEditorController extends GetxController {
   void _handleLinkModeNodeTap(MindMapNode node) {
     if (linkFromNodeId.value.isEmpty) {
       linkFromNodeId.value = node.id;
-      Get.snackbar('Mode liaison', 'Sélectionnez le nœud de destination');
+      // Get.snackbar('Mode liaison', 'Sélectionnez le nœud de destination');
     } else {
       if (linkFromNodeId.value != node.id) {
         _createConnection(linkFromNodeId.value, node.id);
@@ -1248,7 +1337,7 @@ class MindMapEditorController extends GetxController {
     isLinkMode.value = !isLinkMode.value;
     linkFromNodeId.value = '';
     if (isLinkMode.value) {
-      Get.snackbar('Mode liaison', 'Sélectionnez deux nœuds à connecter');
+      // Get.snackbar('Mode liaison', 'Sélectionnez deux nœuds à connecter');
     }
   }
 
@@ -1313,7 +1402,7 @@ class MindMapEditorController extends GetxController {
 
   void showTextEditor() {
     if (selectedNodeId.value.isEmpty) {
-      Get.snackbar('Erreur', 'Sélectionnez un nœud pour modifier le texte');
+      // Get.snackbar('Erreur', 'Sélectionnez un nœud pour modifier le texte');
       return;
     }
 
@@ -1354,7 +1443,7 @@ class MindMapEditorController extends GetxController {
 
   void showColorPicker() {
     if (selectedNodeId.value.isEmpty) {
-      Get.snackbar('Erreur', 'Sélectionnez un nœud pour changer les couleurs');
+      // Get.snackbar('Erreur', 'Sélectionnez un nœud pour changer les couleurs');
       return;
     }
 
@@ -1454,7 +1543,7 @@ class MindMapEditorController extends GetxController {
   // Nouvelle méthode pour ajuster la taille
   void showSizeEditor() {
     if (selectedNodeId.value.isEmpty) {
-      Get.snackbar('Erreur', 'Sélectionnez un nœud pour modifier la taille');
+      // Get.snackbar('Erreur', 'Sélectionnez un nœud pour modifier la taille');
       return;
     }
 
@@ -1531,12 +1620,12 @@ class MindMapEditorController extends GetxController {
 
   void deleteSelected() {
     if (selectedNodeId.value.isEmpty) {
-      Get.snackbar('Erreur', 'Sélectionnez un nœud à supprimer');
+      // Get.snackbar('Erreur', 'Sélectionnez un nœud à supprimer');
       return;
     }
 
     if (selectedNodeId.value == 'central') {
-      Get.snackbar('Erreur', 'Impossible de supprimer le nœud central');
+      // Get.snackbar('Erreur', 'Impossible de supprimer le nœud central');
       return;
     }
 
@@ -1609,31 +1698,31 @@ void deleteProject() async {
         }
         
         Get.back(); // Retour à l'écran précédent
-        Get.snackbar(
-          'Succès', 
-          'Projet supprimé avec succès',
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        // Get.snackbar(
+        //   'Succès', 
+        //   'Projet supprimé avec succès',
+        //   backgroundColor: Colors.green,
+        //   colorText: Colors.white,
+        // );
       } else {
-        Get.snackbar(
-          'Erreur', 
-          'Impossible de supprimer le projet',
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        // Get.snackbar(
+        //   'Erreur', 
+        //   'Impossible de supprimer le projet',
+        //   backgroundColor: Colors.red,
+        //   colorText: Colors.white,
+        // );
       }
     } catch (e) {
       // Fermer l'indicateur de chargement en cas d'erreur
       if (Get.isDialogOpen == true) Get.back();
       
       print('Erreur suppression: $e');
-      Get.snackbar(
-        'Erreur', 
-        'Erreur lors de la suppression: ${e.toString()}',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      // Get.snackbar(
+      //   'Erreur', 
+      //   'Erreur lors de la suppression: ${e.toString()}',
+      //   backgroundColor: Colors.red,
+      //   colorText: Colors.white,
+      // );
     }
   }
 }
@@ -1648,23 +1737,131 @@ void deleteProject() async {
     Get.snackbar('Info', 'Fonction de restauration à implémenter');
   }
 
-  void exportToPdf() {
-    // Implémentation de l'export PDF
-    Get.snackbar(
-      'Export PDF',
-      'Fonctionnalité d\'export PDF à implémenter',
-      backgroundColor: Colors.orange,
-      colorText: Colors.white,
-    );
+  Future<void> exportToPdf() async {
+    try {
+      Get.dialog(
+        AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 20),
+              Text('Génération du PDF en cours...'),
+            ],
+          ),
+        ),
+        barrierDismissible: false,
+      );
+
+      final boundary = canvasKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) {
+        Get.back();
+        // Get.snackbar('Erreur', 'Impossible de capturer le canvas');
+        return;
+      }
+
+      final image = await boundary.toImage();
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final imageBytes = byteData?.buffer.asUint8List();
+
+      if (imageBytes == null) {
+        Get.back();
+        // Get.snackbar('Erreur', 'Échec de la capture d\'écran');
+        return;
+      }
+
+      final pdf = pw.Document();
+      pdf.addPage(
+        pw.Page(
+          build: (pw.Context context) {
+            return pw.Center(
+              child: pw.Image(pw.MemoryImage(imageBytes)),
+            );
+          },
+        ),
+      );
+
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdf.save(),
+      );
+
+      Get.back();
+      Get.snackbar(
+        'Succès',
+        'PDF généré avec succès',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      if (Get.isDialogOpen == true) Get.back();
+      Get.snackbar(
+        'Erreur',
+        'Échec de l\'export PDF: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
   }
 
-  void exportToImage() {
-    // Implémentation de l'export Image
-    Get.snackbar(
-      'Export Image',
-      'Fonctionnalité d\'export Image à implémenter',
-      backgroundColor: Colors.orange,
-      colorText: Colors.white,
-    );
-  }
+//   Future<void> exportToImage() async {
+//   try {
+//     Get.dialog(
+//       AlertDialog(
+//         content: Column(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             CircularProgressIndicator(),
+//             SizedBox(height: 20),
+//             Text('Capture en cours...'),
+//           ],
+//         ),
+//       ),
+//       barrierDismissible: false,
+//     );
+
+//     final boundary = canvasKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+//     if (boundary == null) {
+//       Get.back();
+//       Get.snackbar('Erreur', 'Impossible de capturer le canvas');
+//       return;
+//     }
+
+//     final image = await boundary.toImage();
+//     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+//     final imageBytes = byteData?.buffer.asUint8List();
+
+//     if (imageBytes == null) {
+//       Get.back();
+//       Get.snackbar('Erreur', 'Échec de la capture d\'écran');
+//       return;
+//     }
+
+//     final result = await ImageGallerySaver.saveImage(imageBytes);
+    
+//     Get.back();
+//     if (result['isSuccess'] == true) {
+//       Get.snackbar(
+//         'Succès',
+//         'Image sauvegardée dans la galerie',
+//         backgroundColor: Colors.green,
+//         colorText: Colors.white,
+//       );
+//     } else {
+//       Get.snackbar(
+//         'Erreur',
+//         'Échec de la sauvegarde',
+//         backgroundColor: Colors.red,
+//         colorText: Colors.white,
+//       );
+//     }
+//   } catch (e) {
+//     if (Get.isDialogOpen == true) Get.back();
+//     Get.snackbar(
+//       'Erreur',
+//       'Échec de l\'export image: ${e.toString()}',
+//       backgroundColor: Colors.red,
+//       colorText: Colors.white,
+//     );
+//   }
+// }
 }

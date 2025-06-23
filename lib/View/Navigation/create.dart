@@ -414,7 +414,7 @@ class CreateController extends GetxController {
     
     Get.snackbar(
       'Succès',
-      'Mind map "${titleController.text}" créé avec succès!',
+      'Mindmapping "${titleController.text}" créé avec succès!',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.green,
       colorText: Colors.white,

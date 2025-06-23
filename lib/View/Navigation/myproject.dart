@@ -288,7 +288,7 @@ class Myproject extends StatelessWidget {
       lastModified = DateTime.now();
     }
   } catch (e) {
-    print('Erreur lors de la conversion de la date: $e');
+    // print('Erreur lors de la conversion de la date: $e');
     lastModified = DateTime.now();
   }
   
@@ -483,25 +483,25 @@ class Myproject extends StatelessWidget {
                 // Fermer l'indicateur de chargement
                 Get.back();
                 
-                Get.snackbar(
-                  'Succès',
-                  'Projet renommé avec succès',
-                  backgroundColor: Colors.green,
-                  colorText: Colors.white,
-                  icon: const Icon(Icons.check, color: Colors.white),
-                );
+                // Get.snackbar(
+                //   'Succès',
+                //   'Projet renommé avec succès',
+                //   backgroundColor: Colors.green,
+                //   colorText: Colors.white,
+                //   icon: const Icon(Icons.check, color: Colors.white),
+                // );
               } catch (e) {
                 // Fermer l'indicateur de chargement
                 if (Get.isDialogOpen ?? false) Get.back();
                 
                 print('Erreur lors du renommage: $e');
-                Get.snackbar(
-                  'Erreur',
-                  'Impossible de renommer le projet: $e',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                  icon: const Icon(Icons.error, color: Colors.white),
-                );
+                // Get.snackbar(
+                //   'Erreur',
+                //   'Impossible de renommer le projet: $e',
+                //   backgroundColor: Colors.red,
+                //   colorText: Colors.white,
+                //   icon: const Icon(Icons.error, color: Colors.white),
+                // );
               }
             } else {
               Get.snackbar(
@@ -536,7 +536,7 @@ class Myproject extends StatelessWidget {
       barrierDismissible: false,
     );
     
-    print('Duplication du projet: ${project['id']} - ${project['title']}');
+    // print('Duplication du projet: ${project['id']} - ${project['title']}');
     await storage.duplicateProject(project);
     
     // Fermer l'indicateur de chargement
@@ -554,15 +554,15 @@ class Myproject extends StatelessWidget {
     // Fermer l'indicateur de chargement
     if (Get.isDialogOpen ?? false) Get.back();
     
-    print('Erreur lors de la duplication: $e');
-    Get.snackbar(
-      'Erreur',
-      'Impossible de dupliquer le projet: $e',
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-      icon: const Icon(Icons.error, color: Colors.white),
-      duration: const Duration(seconds: 5),
-    );
+    // print('Erreur lors de la duplication: $e');
+    // Get.snackbar(
+    //   'Erreur',
+    //   'Impossible de dupliquer le projet: $e',
+    //   backgroundColor: Colors.red,
+    //   colorText: Colors.white,
+    //   icon: const Icon(Icons.error, color: Colors.white),
+    //   duration: const Duration(seconds: 5),
+    // );
   }
 }
 
@@ -671,33 +671,33 @@ class Myproject extends StatelessWidget {
                 throw Exception('ID de projet invalide');
               }
               
-              print('Suppression du projet: $projectId');
+              // print('Suppression du projet: $projectId');
               await storage.deleteProject(projectId);
               
               // Fermer l'indicateur de chargement
               Get.back();
               
-              Get.snackbar(
-                'Supprimé',
-                'Projet "${project['title']}" supprimé avec succès',
-                backgroundColor: Colors.red,
-                colorText: Colors.white,
-                icon: const Icon(Icons.delete, color: Colors.white),
-              );
+              // Get.snackbar(
+              //   'Supprimé',
+              //   'Projet "${project['title']}" supprimé avec succès',
+              //   backgroundColor: Colors.red,
+              //   colorText: Colors.white,
+              //   icon: const Icon(Icons.delete, color: Colors.white),
+              // );
               
             } catch (e) {
               // Fermer l'indicateur de chargement si ouvert
               if (Get.isDialogOpen ?? false) Get.back();
               
               print('Erreur lors de la suppression: $e');
-              Get.snackbar(
-                'Erreur',
-                'Impossible de supprimer le projet: $e',
-                backgroundColor: Colors.red,
-                colorText: Colors.white,
-                icon: const Icon(Icons.error, color: Colors.white),
-                duration: const Duration(seconds: 5),
-              );
+              // Get.snackbar(
+              //   'Erreur',
+              //   'Impossible de supprimer le projet: $e',
+              //   backgroundColor: Colors.red,
+              //   colorText: Colors.white,
+              //   icon: const Icon(Icons.error, color: Colors.white),
+              //   duration: const Duration(seconds: 5),
+              // );
             }
           },
           style: ElevatedButton.styleFrom(
